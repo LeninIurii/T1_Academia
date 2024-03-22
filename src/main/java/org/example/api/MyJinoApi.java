@@ -1,6 +1,8 @@
 package org.example.api;
+
 import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.example.utils.ApiAdminClient;
 
@@ -24,16 +26,26 @@ public class MyJinoApi<T> extends ApiAdminClient {
                 .then().statusCode(HttpStatus.SC_OK).extract().response().as(clazz);
     }
 
+    @Step("Отправить POST-запрос по адрессу {url} в сервис {endpoint}")
+    public Response postCheckDataOk(String url, String body, String endpoint) {
+        return request(url)
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post(endpoint)
+                .then().extract().response();
+    }
+
     @Step("Отправить GET-запрос по адрессу {url} в сервис {endpoint}")
-    public T getProducts(String url, String endpoint,Class<T> clazz) {
+    public Response getProducts(String url, String endpoint) {
         return request(url)
                 .contentType(ContentType.JSON)
                 .when().get(endpoint)
-                .then().statusCode(HttpStatus.SC_OK).extract().response().as(clazz);
+                .then().extract().response();
     }
 
     @Step("Отправить PUT-запрос по адрессу {url} в сервис {endpoint}")
-    public T putData(String url,String body, String endpoint,Class<T> clazz) {
+    public T putData(String url, String body, String endpoint, Class<T> clazz) {
         return request(url)
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
@@ -41,12 +53,13 @@ public class MyJinoApi<T> extends ApiAdminClient {
                 .when().put(endpoint)
                 .then().statusCode(HttpStatus.SC_OK).extract().response().as(clazz);
     }
+
     @Step("Отправить DELETE-запрос по адрессу {url} в сервис {endpoint}")
-    public String deleteData(String url, String endpoint) {
+    public T deleteData(String url, String endpoint, Class<T> clazz) {
         return request(url)
                 .accept(ContentType.JSON)
                 .when().delete(endpoint)
-                .then().statusCode(HttpStatus.SC_OK).extract().asString();
+                .then().statusCode(HttpStatus.SC_OK).extract().as(clazz);
     }
 
 }
